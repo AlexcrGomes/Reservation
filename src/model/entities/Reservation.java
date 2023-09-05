@@ -4,18 +4,23 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import model.exceptions.DomainExceptions;
+
 public class Reservation {
 
 	private Integer roomNumber;
 	private LocalDate checkIn;
-	private LocalDate chackOut;
+	private LocalDate checkOut;
 	
 	public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
-	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate chackOut) {
+	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut) {
+		if(checkOut.isBefore(checkIn)) {
+			throw new DomainExceptions("Error in reservation: check-out date must be after check-in date.");
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;
-		this.chackOut = chackOut;
+		this.checkOut = checkOut;
 	}
 
 	public Integer getRoomNumber() {
@@ -30,24 +35,23 @@ public class Reservation {
 		return checkIn;
 	}
 
-	public LocalDate getChackOut() {
-		return chackOut;
+	public LocalDate getcheckOut() {
+		return checkOut;
 	}
 
 	public long duration() {
-		return checkIn.until(chackOut, ChronoUnit.DAYS);
+		return checkIn.until(checkOut, ChronoUnit.DAYS);
 	}
 	
-	public String upDateDates(LocalDate checkIn, LocalDate checkOut) {
+	public void upDateDates(LocalDate checkIn, LocalDate checkOut) {
 		if(checkOut.isBefore(checkIn)) {
-			return "Error in reservation: check-out date must be after check-in date.";
+			throw new DomainExceptions("Error in reservation: check-out date must be after check-in date.");
 		}
 		if(checkIn.isBefore(LocalDate.now()) || checkOut.isBefore(LocalDate.now())) {
-			return "Error in reservation: Reservation dates for update must be future dates.";
+			throw new DomainExceptions("Error in reservation: Reservation dates for update must be future dates.");
 		}
 		this.checkIn = checkIn;
-		this.chackOut = checkOut;
-		return null;
+		this.checkOut = checkOut;
 	}
 
 	@Override
@@ -56,11 +60,11 @@ public class Reservation {
 				+ roomNumber
 				+ ", checkIn: "
 				+ dtf.format(checkIn)
-				+ ", chackOut: "
-				+ dtf.format(chackOut)
+				+ ", checkOut: "
+				+ dtf.format(checkOut)
 				+ ", "
 				+ duration()
-				+ " nigths";
+				+ " nigths.";
 	}
 	
 }
